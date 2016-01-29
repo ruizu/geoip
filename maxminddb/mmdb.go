@@ -37,10 +37,6 @@ const (
 	DataTypeArray      int = C.MMDB_DATA_TYPE_ARRAY
 	DataTypeBoolean    int = C.MMDB_DATA_TYPE_BOOLEAN
 	DataTypeFloat      int = C.MMDB_DATA_TYPE_FLOAT
-	// DataTypeExtended   int = C.MMDB_DATA_TYPE_EXTENDED
-	// DataTypePointer    int = C.MMDB_DATA_TYPE_POINTER
-	// DataTypeContainer  int = C.MMDB_DATA_TYPE_CONTAINER
-	// DataTypeEndMarker  int = C.MMDB_DATA_TYPE_END_MARKER
 )
 
 type DB struct {
@@ -58,6 +54,21 @@ func Open(f string, m uint32) (*DB, error) {
 
 func (db *DB) Close() {
 	C.MMDB_close(&db.mmdb)
+}
+
+func (db *DB) Lookup(ip string) (interface{}, error) {
+	var gaiError, mmdbError C.int
+	result := C.MMDB_lookup_string(&db.mmdb, C.CString(ip), &gaiError, &mmdbError)
+	if gaiError != 0 {
+		return nil, fmt.Errorf(C.GoString(C.gai_strerror(gaiError)))
+	}
+	if mmdbError != C.int(StatusSuccess) {
+		return nil, fmt.Errorf(ErrorString(int(mmdbError)))
+	}
+	if result.found_entry != C._Bool(true) {
+		return nil, fmt.Errorf("no entry for ip (%s) was found.", ip)
+	}
+	return nil, nil
 }
 
 func ErrorString(code int) string {

@@ -1,4 +1,4 @@
-package geoip
+package geoip2
 
 import (
 	"github.com/ruizu/geoip/maxminddb"
@@ -51,6 +51,14 @@ type SubdivisionType struct {
 
 type DB struct {
 	maxminddb.DB
+}
+
+func Open(f string, m uint32) (*DB, error) {
+	db, err := maxminddb.Open(f, m)
+	if err != nil {
+		return nil, err
+	}
+	return &DB{*db}, nil
 }
 
 func (db *DB) CityLookup() {
