@@ -1,70 +1,77 @@
 package geoip2
 
 import (
+	"fmt"
+
 	"github.com/ruizu/geoip/maxminddb"
 )
 
-type CityDB struct {
-	City               CityType
-	Continent          ContinentType
-	Country            CountryType
-	Location           LocationType
-	RegisteredCountry  CountryType
-	RepresentedCountry CountryType
+type City struct {
+	City               TypeCity
+	Continent          TypeContinent
+	Country            TypeCountry
+	Location           TypeLocation
+	RegisteredCountry  TypeCountry
+	RepresentedCountry TypeCountry
 }
 
-type CountryDB struct {
-	Continent          ContinentType
-	Country            CountryType
-	RegisteredCountry  CountryType
-	RepresentedCountry CountryType
+type Country struct {
+	Continent          TypeContinent
+	Country            TypeCountry
+	RegisteredCountry  TypeCountry
+	RepresentedCountry TypeCountry
 }
 
-type CityType struct {
+type TypeCity struct {
 	GeoNameID int64
 	Names     map[string]string
 }
 
-type ContinentType struct {
+type TypeContinent struct {
 	GeoNameID int64
 	Code      string
 	Names     map[string]string
 }
 
-type CountryType struct {
+type TypeCountry struct {
 	GeoNameID int64
 	ISOCode   string
 	Names     map[string]string
 }
 
-type LocationType struct {
+type TypeLocation struct {
 	Latitude  float64
 	Longitude float64
 	TimeZone  string
 }
 
-type SubdivisionType struct {
+type TypeSubdivision struct {
 	GeoNameID int64
 	ISOCode   string
 	Names     map[string]string
 }
 
-type DB struct {
+type CityDB struct {
 	maxminddb.DB
 }
 
-func Open(f string, m uint32) (*DB, error) {
-	db, err := maxminddb.Open(f, m)
+func OpenCityDB(f string) (*CityDB, error) {
+	println(maxminddb.Version())
+	db, err := maxminddb.Open(f, maxminddb.ModeMMap)
 	if err != nil {
 		return nil, err
 	}
-	return &DB{*db}, nil
+	return &CityDB{*db}, nil
 }
 
-func (db *DB) CityLookup() {
+func (db *CityDB) Lookup(ip string) (City, error) {
+	result, err := db.DB.Lookup(ip)
+	if err != nil {
+		return City{}, err
+	}
 
-}
+	result.Dump()
+	result.Free()
 
-func (db *DB) CountryLookup() {
-
+	return City{}, nil
 }
